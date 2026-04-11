@@ -1,247 +1,3 @@
-        # We search deeper (40 results) to find the best personalities
-        for r in ddgs.text(query, max_results=40):
-            # Skip massive directories like Yelp or Facebook
-            if not any(x in r['href'] for x in ['yelp.com', 'yellowpages.com', 'facebook.com']):
-                
-                snippet = r['body'].lower()
-                contact_type = "LinkedIn/Profile"
-                
-                # Check if the snippet contains an email or WhatsApp number
-                if "@" in snippet: contact_type = "Email Hinted"
-                if "whatsapp" in snippet or "+" in snippet: contact_type = "WhatsApp/Phone Found"
-                
-                results.append({
-                    'Person/Business': r['title'],
-                    'Direct Link': r['href'],
-                    'Contact Hint': r['body'][:180],
-                    'Lead Quality': contact_type
-                })
-    
-    if results:
-        df = pd.DataFrame(results)
-        # Unique filename so you don't lose yesterday's work
-        filename = f"{industry.replace(' ', '_')}_{location.replace(' ', '_')}.csv"
-        df.to_csv(filename, index=False)
-        print(f"--- ✅ HUNT COMPLETE! ---")
-        print(f"Found {len(df)} leads. Saved to: {filename}")
-        print(f"To see them, type: cat {filename}")
-    else:
-        print("No specific leads found. Try a broader industry name.")
-
-# RUNNING FOR LAW FIRMS
-hunter_agent("Law Firm", "New York")
-EOF
-
-python hunter.py
-pkg install tur-repo -y
-pkg install python-pandas -y && pip install duckduckgo-search
-pkg install tur-repo -y && pkg install python-pandas -y
-pip install duckduckgo-search==6.2.13
-~pip cache purge
-pip install duckduckgo-search==3.8.5
-pkg install python-lxml -y
-cat <<EOF > hunter.py
-import pandas as pd
-from duckduckgo_search import DDGS
-
-def find_outdated_leads(industry, location):
-    print(f"\n--- 🕵️‍♂️ EASYWURLD: Hunting for OUTDATED sites in {location} ---")
-    
-    # We search for the industry + indicators of old/neglected sites
-    # Keywords: "Copyright 2019..2022", "Under construction", "Not mobile friendly"
-    query = f'{industry} {location} (Owner OR Partner) ("Copyright 2017" OR "Copyright 2018" OR "Copyright 2019" OR "Copyright 2020" OR "Copyright 2021" OR "Under Construction")'
-    
-    results = []
-    with DDGS() as ddgs:
-        # Looking at 40 results to find the "worst" websites
-        search_results = ddgs.text(query, max_results=40)
-        
-        for r in search_results:
-            snippet = r['body'].lower()
-            url = r['href'].lower()
-            
-            # Filter out big tech/directories
-            if not any(x in url for x in ['facebook.com', 'yelp.com', 'clutch.co', 'linkedin.com/company']):
-                
-                # Logic to determine WHY it is a "Bad/Outdated" site
-                reason = "Unknown"
-                if "copyright 20" in snippet: reason = "Old Copyright Year"
-                if "construction" in snippet: reason = "Site Unfinished"
-                if "not found" in snippet: reason = "Broken Links"
-                
-                results.append({
-                    'Business/Owner': r['title'],
-                    'Website': r['href'],
-                    'Why it is Outdated': reason,
-                    'Snippet': r['body'][:150]
-                })
-
-    if results:
-        df = pd.DataFrame(results)
-        filename = f"outdated_{industry.replace(' ', '_')}.csv"
-        df.to_csv(filename, index=False)
-        print(f"--- ✅ SUCCESS! ---")
-        print(f"Found {len(df)} outdated or bad websites.")
-        print(f"Check your file: {filename}")
-    else:
-        print("No outdated sites found with those specific markers. Try a broader city.")
-
-# Set your target here
-find_outdated_leads("Law Firm", "New York")
-EOF
-
-python hunter.py
-pip install ddg3
-cat <<EOF > hunter.py
-import pandas as pd
-from ddg3 import ddg
-
-def find_outdated_leads(industry, location):
-    print(f"\n--- 🕵️‍♂️ EASYWURLD: Hunting for OUTDATED sites in {location} ---")
-    
-    # Looking for industry + indicators of old/neglected sites
-    query = f'{industry} {location} (Owner OR Partner) ("Copyright 2018" OR "Copyright 2019" OR "Copyright 2020" OR "Copyright 2021")'
-    
-    # ddg3 is much simpler and faster for Termux
-    raw_results = ddg(query, max_results=25)
-    
-    results = []
-    for r in raw_results:
-        snippet = r['body'].lower()
-        url = r['href'].lower()
-        
-        # Filter out the big directories that don't need web design
-        if not any(x in url for x in ['facebook.com', 'yelp.com', 'clutch.co', 'linkedin.com/company']):
-            
-            # Logic to flag WHY the site is bad
-            reason = "Old Copyright Year"
-            if "construction" in snippet: reason = "Site Unfinished"
-            if "201" in snippet or "2020" in snippet: reason = "Outdated Copyright"
-            
-            results.append({
-                'Business/Owner': r['title'],
-                'Website': r['href'],
-                'Reason': reason,
-                'Snippet': r['body'][:150]
-            })
-
-    if results:
-        df = pd.DataFrame(results)
-        filename = f"outdated_{industry.replace(' ', '_')}.csv"
-        df.to_csv(filename, index=False)
-        print(f"--- ✅ SUCCESS! ---")
-        print(f"Found {len(df)} leads with outdated websites.")
-        print(f"To see them: cat {filename}")
-    else:
-        print("No results. Try changing the city name.")
-
-find_outdated_leads("Law Firm", "New York")
-EOF
-
-python hunter.py
-cat <<EOF > hunter.py
-import pandas as pd
-from ddg3 import DDG3
-
-def find_outdated_leads(industry, location):
-    print(f"\n--- 🕵️‍♂️ EASYWURLD: Hunting for OUTDATED sites in {location} ---")
-    
-    # Query for industry + old copyright markers
-    query = f'{industry} {location} (Owner OR Partner) ("Copyright 2018" OR "Copyright 2019" OR "Copyright 2020" OR "Copyright 2021")'
-    
-    # Initialize the new version of the tool
-    ddg = DDG3()
-    raw_results = ddg.text(query, max_results=25)
-    
-    results = []
-    for r in raw_results:
-        snippet = r.get('body', '').lower()
-        url = r.get('href', '').lower()
-        
-        # Filter out directories
-        if not any(x in url for x in ['facebook.com', 'yelp.com', 'clutch.co', 'linkedin.com/company']):
-            
-            # Flagging the 'Bad' website reason
-            reason = "Old Copyright Year"
-            if "construction" in snippet: reason = "Site Unfinished"
-            
-            results.append({
-                'Business/Owner': r.get('title'),
-                'Website': r.get('href'),
-                'Reason': reason,
-                'Snippet': snippet[:150]
-            })
-
-    if results:
-        df = pd.DataFrame(results)
-        filename = f"outdated_{industry.replace(' ', '_')}.csv"
-        df.to_csv(filename, index=False)
-        print(f"--- ✅ SUCCESS! ---")
-        print(f"Found {len(df)} leads with outdated websites.")
-        print(f"To see them, type: cat {filename}")
-    else:
-        print("No results found. Try a different city or a broader industry name.")
-
-find_outdated_leads("Law Firm", "New York")
-EOF
-
-pip install -U duckpy
-cat <<EOF > hunter.py
-import pandas as pd
-from duckpy import Client
-
-def find_outdated_leads(industry, location):
-    print(f"\n--- 🕵️‍♂️ EASYWURLD: Hunting for OUTDATED sites in {location} ---")
-    
-    # Target query: Industry + City + Old Copyright footprints
-    query = f'{industry} {location} (Owner OR Partner) ("Copyright 2018" OR "Copyright 2019" OR "Copyright 2020" OR "Copyright 2021")'
-    
-    client = Client()
-    raw_results = client.search(query)
-    
-    results = []
-    for r in raw_results:
-        snippet = r.description.lower()
-        url = r.url.lower()
-        
-        # Filter out directories and social media
-        if not any(x in url for x in ['facebook.com', 'yelp.com', 'clutch.co', 'linkedin.com']):
-            
-            # Logic to flag why the site is a good target
-            reason = "Old Copyright Year"
-            if "construction" in snippet: reason = "Site Unfinished"
-            
-            results.append({
-                'Business/Owner': r.title,
-                'Website': r.url,
-                'Reason': reason,
-                'Snippet': snippet[:150]
-            })
-
-    if results:
-        df = pd.DataFrame(results)
-        filename = f"outdated_{industry.replace(' ', '_')}.csv"
-        df.to_csv(filename, index=False)
-        print(f"--- ✅ SUCCESS! ---")
-        print(f"Found {len(df)} outdated leads.")
-        print(f"To see them, type: cat {filename}")
-    else:
-        print("No outdated sites found. Try a different city like 'Chicago' or 'Houston'.")
-
-# Running the hunt
-find_outdated_leads("Law Firm", "New York")
-EOF
-
-python hunter.py
-cat <<EOF > hunter.py
-import urllib.request
-import urllib.parse
-import re
-import csv
-
-def universal_hunter(industry, location):
-    print(f"\n--- 🕵️‍♂️ EASYWURLD: Hunting for OUTDATED {industry} sites in {location} ---")
-    
     # Searching for industry + old copyright markers
     query = f'{industry} {location} "Copyright 2018" OR "Copyright 2019" OR "Copyright 2020"'
     encoded_query = urllib.parse.quote(query)
@@ -498,3 +254,247 @@ EOF
 git add .
 git commit -m "Emergency link fix"
 git push
+~leads=("Paga_Corp" "Eden_Life" "Konga_Online" "Enyo_Retail" "HealthTracka" "Austin_Movers" "London_Glow" "Calgary_Dental" "Melbourne_Realty" "Dubai_Yacht")
+for company in "${leads[@]}"; do   clean_name=$(echo $company | sed 's/_/ /g')
+  cat <<EOF > "${company}.html"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${clean_name} | Concept</title>
+    <style>
+        body { background:#000; color:#fff; font-family:sans-serif; text-align:center; padding:50px; }
+        .btn { display:block; padding:20px; background:#00ff88; color:#000; text-decoration:none; border-radius:10px; margin:20px auto; max-width:300px; font-weight:bold; }
+    </style>
+</head>
+<body>
+    <h1>${clean_name}</h1>
+    <p>Exclusive 2026 Digital Design by Easywurld</p>
+    <a href="https://wa.me/2349050690837" class="btn">WhatsApp Me</a>
+</body>
+</html>
+EOF
+ done
+git add . && git commit -m "Sunday Prep Batch" && git push
+leads=("Paga_Corp" "Eden_Life" "Konga_Online" "Enyo_Retail" "HealthTracka" "Austin_Movers" "London_Glow" "Calgary_Dental" "Melbourne_Realty" "Dubai_Yacht")
+for company in "${leads[@]}"; do   clean_name=$(echo $company | sed 's/_/ /g')
+  cat <<EOF > "${company}.html"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${clean_name} | Concept</title>
+    <style>
+        body { background:#000; color:#fff; font-family:sans-serif; text-align:center; padding:50px; }
+        .btn { display:block; padding:20px; background:#00ff88; color:#000; text-decoration:none; border-radius:10px; margin:20px auto; max-width:300px; font-weight:bold; }
+    </style>
+</head>
+<body>
+    <h1>${clean_name}</h1>
+    <p>Exclusive 2026 Digital Design by Easywurld</p>
+    <a href="https://wa.me/2349050690837" class="btn">WhatsApp Me</a>
+</body>
+</html>
+EOF
+ done
+git add . && git commit -m "Sunday Prep Batch" && git push
+# Go to the root directory
+cd ~
+# If the folder exists, enter it
+cd Easywurld 2>/dev/null || cd easywurld_demos 2>/dev/null
+# Force everything to the main area
+git add .
+git commit -m "Final link sync"
+git push origin main
+cat <<EOF > Toronto_Dental_Hub.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toronto Dental Hub | Premium Oral Care</title>
+    <style>
+        :root { --teal: #00d2d3; --dark: #10ac84; }
+        body { font-family: 'Helvetica', sans-serif; margin: 0; color: #333; line-height: 1.6; }
+        .hero { background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=80'); height: 100vh; background-size: cover; display: flex; align-items: center; justify-content: center; color: #fff; text-align: center; }
+        .section { padding: 80px 20px; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; margin: auto; }
+        .card { padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); background: #fff; }
+        .cta-btn { background: var(--teal); color: #fff; padding: 20px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.2rem; }
+        footer { background: #222; color: #fff; padding: 50px; text-align: center; }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <div>
+            <h1 style="font-size: 4rem;">Smile With Confidence</h1>
+            <p style="font-size: 1.5rem;">Toronto's Most Advanced Digital Dental Clinic</p>
+            <br><br>
+            <a href="https://wa.me/2349050690837" class="cta-btn">Book Consultation</a>
+        </div>
+    </header>
+
+    <section class="section">
+        <h2>Our Specialized Services</h2>
+        <div class="grid">
+            <div class="card"><h3>Digital Implants</h3><p>State-of-the-art 3D imaging for perfect precision.</p></div>
+            <div class="card"><h3>Laser Whitening</h3><p>Get a celebrity smile in under 45 minutes.</p></div>
+            <div class="card"><h3>Pediatric Care</h3><p>Making the dentist a fun place for the kids.</p></div>
+        </div>
+    </section>
+
+    <section class="section" style="background: #f9f9f9;">
+        <h2>Why Toronto Dental Hub?</h2>
+        <p style="max-width: 700px; margin: auto;">We combine the latest AI dental technology with a gentle, patient-first approach. 20+ years of experience in the Ontario region.</p>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Toronto Dental Hub // Digital Strategy by Easywurld</p>
+        <a href="tel:+2349050690837" style="color: #00d2d3;">Emergency Call: +234 905 069 0837</a>
+    </footer>
+</body>
+</html>
+EOF
+
+git add . && git commit -m "Deployed full landing page demo" && git push
+cd ~
+cd Easywurld 2>/dev/null || cd easywurld_demos 2>/dev/null
+leads=("Air_Peace" "Mikano_Int" "Innoson_Motors" "Dana_Air" "Leadway_Assurance" "Texas_Logistics" "London_Health" "Vancouver_Realty" "Sydney_Solar" "Dubai_Gold")
+for company in "${leads[@]}"; do   clean_name=$(echo $company | sed 's/_/ /g')
+  cat <<EOF > "${company}.html"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${clean_name} | Official Digital Portal</title>
+    <style>
+        :root { --main: #00d2d3; --dark: #111; --gray: #f4f4f4; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; color: #333; line-height: 1.6; scroll-behavior: smooth; }
+        nav { background: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .hero { background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80'); height: 80vh; background-size: cover; display: flex; align-items: center; justify-content: center; color: #fff; text-align: center; }
+        .section { padding: 80px 20px; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1100px; margin: auto; }
+        .card { padding: 40px; border-radius: 10px; background: #fff; border: 1px solid #eee; transition: 0.3s; }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .btn { background: #000; color: #fff; padding: 18px 35px; border-radius: 5px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 20px; }
+        .accent-btn { background: var(--main); color: #fff; }
+        footer { background: var(--dark); color: #fff; padding: 60px 20px; text-align: center; }
+        .footer-links { margin: 20px 0; display: flex; justify-content: center; gap: 20px; list-style: none; padding: 0; }
+        .footer-links a { color: #fff; text-decoration: none; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div style="font-weight: bold; font-size: 1.2rem;">${clean_name}</div>
+        <a href="https://wa.me/2349050690837" style="text-decoration:none; color:#000; font-weight:bold;">Contact Agent</a>
+    </nav>
+
+    <div class="hero">
+        <div>
+            <h1 style="font-size: 3.5rem; margin:0;">${clean_name}</h1>
+            <p style="font-size: 1.2rem; margin:20px 0;">Performance, Precision, and Digital Excellence.</p>
+            <a href="#services" class="btn accent-btn">Explore Services</a>
+        </div>
+    </div>
+
+    <section id="services" class="section">
+        <h2>Our Core Capabilities</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Global Operations</h3>
+                <p>Scaling solutions across borders with unmatched efficiency and reliability.</p>
+            </div>
+            <div class="card">
+                <h3>Innovation First</h3>
+                <p>Leveraging 2026 technology to streamline infrastructure and logistics.</p>
+            </div>
+            <div class="card">
+                <h3>Dedicated Support</h3>
+                <p>Round-the-clock priority assistance for all enterprise-level clients.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" style="background: var(--gray);">
+        <div style="max-width: 800px; margin: auto;">
+            <h2>Strategy for Growth</h2>
+            <p>This full-length portal is a custom architectural demo designed by <b>Easywurld</b> to show how ${clean_name} can dominate the digital landscape this year.</p>
+            <a href="tel:+2349050690837" class="btn">Talk to the Architect</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 ${clean_name}. All rights reserved.</p>
+        <ul class="footer-links">
+            <li><a href="https://wa.me/2349050690837">WhatsApp</a></li>
+            <li><a href="tel:+2349050690837">Direct Line</a></li>
+        </ul>
+        <p style="font-size: 12px; color: #666; margin-top: 20px;">Designed & Managed by Easywurld Digital Agency</p>
+    </footer>
+</body>
+</html>
+EOF
+ done
+git add . && git commit -m "Batch Deployment: 10 Full Landing Pages" && git push
+leads=("Air_Peace" "Mikano_Int" "Innoson_Motors" "Dana_Air" "Leadway_Assurance" "Texas_Logistics" "London_Health" "Vancouver_Realty" "Sydney_Solar" "Dubai_Gold")
+for company in "${leads[@]}"; do   clean_name=$(echo $company | sed 's/_/ /g')
+  cat <<EOF > "${company}.html"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${clean_name} | Enterprise Portal</title>
+    <style>
+        :root { --main: #00d2d3; --dark: #111; }
+        body { font-family: 'Helvetica', sans-serif; margin: 0; color: #333; line-height: 1.6; }
+        .hero { background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80'); height: 70vh; background-size: cover; display: flex; align-items: center; justify-content: center; color: #fff; text-align: center; }
+        .section { padding: 60px 20px; text-align: center; max-width: 1000px; margin: auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 40px; }
+        .card { padding: 30px; border: 1px solid #eee; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .cta-btn { background: #000; color: #fff; padding: 15px 35px; border-radius: 5px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px; }
+        footer { background: #111; color: #fff; padding: 40px; text-align: center; margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div>
+            <h1 style="font-size: 3rem;">${clean_name}</h1>
+            <p style="font-size: 1.2rem;">2026 Digital Performance Architecture</p>
+            <a href="https://wa.me/2349050690837" class="cta-btn" style="background:#00ff88; color:#000;">WhatsApp Me</a>
+        </div>
+    </div>
+    <div class="section">
+        <h2>Corporate Solutions</h2>
+        <div class="grid">
+            <div class="card"><h3>Efficiency</h3><p>Streamlined digital workflows for modern enterprises.</p></div>
+            <div class="card"><h3>Security</h3><p>Enterprise-grade protection for all data and transactions.</p></div>
+            <div class="card"><h3>Scale</h3><p>Built to handle global traffic without slowing down.</p></div>
+        </div>
+    </div>
+    <div class="section" style="background:#f4f4f4; border-radius: 20px;">
+        <h3>Why this design?</h3>
+        <p>Easywurld built this specifically for ${clean_name} to demonstrate a 1-second load time and high-conversion mobile interface.</p>
+        <a href="tel:+2349050690837" class="cta-btn">Call Specialist</a>
+    </div>
+    <footer>
+        <p>&copy; 2026 ${clean_name} // Digital Transformation by Easywurld</p>
+    </footer>
+</body>
+</html>
+EOF
+ done
+git add . && git commit -m "Updated all leads to Full Landing Pages" && git push
+# Enter the repo
+cd ~
+cd Easywurld 2>/dev/null || cd easywurld_demos 2>/dev/null
+# Move all HTML files to the very front so they are easy to find
+mv *.html .. 2>/dev/null
+cd ..
+# Force sync
+git add .
+git commit -m "Moving files to root for easier access"
+git push origin main
