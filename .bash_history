@@ -1,16 +1,3 @@
-cat <<EOF > hunter.py
-import pandas as pd
-from duckduckgo_search import DDGS
-import os
-
-def hunter_agent(industry, location):
-    print(f"\n--- 🎯 EASYWURLD AGENT: Hunting for {industry} in {location} ---")
-    
-    # This query searches for the decision makers and their contact footprints
-    query = f'"{industry}" {location} (Owner OR Partner OR Founder OR CEO) (LinkedIn OR WhatsApp OR "@")'
-    
-    results = []
-    with DDGS() as ddgs:
         # We search deeper (40 results) to find the best personalities
         for r in ddgs.text(query, max_results=40):
             # Skip massive directories like Yelp or Facebook
@@ -471,3 +458,43 @@ git remote add origin https://github.com/USERNAME/REPO.git
 git push -u origin main
 pkg install git -y
 pkg install termux-services git -y
+# 1. Enter your project folder
+cd ~/easywurld_demos
+# 2. Move everything out of any sub-folders to the main area
+mv * .[^.]* .. 2>/dev/null
+cd ..
+rmdir easywurld_demos 2>/dev/null
+# 3. Create a "Home Page" so the main link works too
+cat <<EOF > index.html
+<!DOCTYPE html>
+<html>
+<head><title>Easywurld Portfolio</title></head>
+<body style="background:#000;color:#fff;text-align:center;padding-top:100px;font-family:sans-serif;">
+<h1>EASYWURLD DIGITAL FACTORY</h1>
+<p>2026 Enterprise Demos Live.</p>
+</body>
+</html>
+EOF
+
+# 4. Push the fix live
+git add .
+git commit -m "Fixed file paths for GitHub Pages"
+git push
+# 1. Go to your folder
+cd ~/easywurld_demos
+# 2. Force an index file into the main area
+cat <<EOF > index.html
+<!DOCTYPE html>
+<html>
+<head><title>Easywurld</title></head>
+<body style="background:#000;color:#fff;text-align:center;padding:100px;">
+<h1>EASYWURLD LIVE</h1>
+<p>Demos are active.</p>
+</body>
+</html>
+EOF
+
+# 3. Push everything again
+git add .
+git commit -m "Emergency link fix"
+git push
