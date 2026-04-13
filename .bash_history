@@ -1,126 +1,3 @@
-    # Searching for industry + old copyright markers
-    query = f'{industry} {location} "Copyright 2018" OR "Copyright 2019" OR "Copyright 2020"'
-    encoded_query = urllib.parse.quote(query)
-    url = f"https://html.duckduckgo.com/html/?q={encoded_query}"
-    
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    req = urllib.request.Request(url, headers=headers)
-    
-    try:
-        with urllib.request.urlopen(req) as response:
-            html = response.read().decode('utf-8')
-            
-            # Extracting Titles, Links, and Snippets using Patterns (Regex)
-            links = re.findall(r'href="(http[s]?://.*?)"', html)
-            titles = re.findall(r'result__a">(.*?)</a>', html)
-            
-            leads = []
-            # Filtering out ads and major directories
-            for title, link in zip(titles, links):
-                if not any(x in link for x in ['duckduckgo', 'google', 'facebook', 'yelp', 'amazon']):
-                    leads.append({'Business': title, 'Website': link, 'Status': 'Check for Old Copyright'})
-            
-            if leads:
-                with open('outdated_leads.csv', 'w', newline='', encoding='utf-8') as f:
-                    writer = csv.DictWriter(f, fieldnames=['Business', 'Website', 'Status'])
-                    writer.writeheader()
-                    writer.writerows(leads)
-                print(f"--- ✅ SUCCESS! Found {len(leads)} potential outdated leads. ---")
-                print("Type: cat outdated_leads.csv")
-            else:
-                print("No leads found. Try a different city.")
-                
-    except Exception as e:
-        print(f"Error: {e}")
-
-universal_hunter("Law Firm", "New York")
-EOF
-
-python hunter.py
-cat <<EOF > map_hunter.py
-import urllib.request
-import urllib.parse
-import re
-import csv
-
-def hunt_maps(industry, location):
-    print(f"\n--- 🗺️ EASYWURLD: Scraping Google Presence for {industry} in {location} ---")
-    
-    # We search specifically for the "Place" results on Google
-    query = f'"{industry}" in "{location}"'
-    encoded_query = urllib.parse.quote(query)
-    
-    # We use the mobile-optimized search to avoid laptop-only blocks
-    url = f"https://www.google.com/search?q={encoded_query}&tbm=lcl"
-    
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G960F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Mobile Safari/537.36'
-    }
-    
-    req = urllib.request.Request(url, headers=headers)
-    
-    try:
-        with urllib.request.urlopen(req) as response:
-            html = response.read().decode('latin-1')
-            
-            # Find business names and their website links
-            # These regex patterns look for the structure of Google's 'Map Pack'
-            names = re.findall(r'data-attrid="title".*?>(.*?)<', html)
-            links = re.findall(r'href="(http[s]?://.*?)"', html)
-            
-            leads = []
-            print(f"Analyzing {len(names)} businesses found on the map...")
-            
-            for name in names:
-                # We check if a website link was found near this business name in the code
-                # If not, it likely has NO website listed.
-                has_site = False
-                site_url = "NONE"
-                
-                for link in links:
-                    if name.lower()[:5] in link.lower() or "google" not in link:
-                        has_site = True
-                        site_url = link
-                        break
-                
-                # We filter for the "Easywurld Gold": No site or just Social Media
-                if not has_site or "facebook.com" in site_url or "instagram.com" in site_url:
-                    leads.append({
-                        'Business': name.replace('&amp;', '&'),
-                        'Website': site_url,
-                        'Status': 'NEEDS WEBSITE' if site_url == "NONE" else 'ONLY SOCIAL MEDIA'
-                    })
-
-            if leads:
-                with open('map_leads.csv', 'w', newline='', encoding='utf-8') as f:
-                    writer = csv.DictWriter(f, fieldnames=['Business', 'Website', 'Status'])
-                    writer.writeheader()
-                    writer.writerows(leads)
-                print(f"--- ✅ SUCCESS! ---")
-                print(f"Found {len(leads)} businesses with no real website.")
-                print("Type: cat map_leads.csv")
-            else:
-                print("No clear 'No-Website' leads found. Try a different industry!")
-
-    except Exception as e:
-        print(f"Error: {e}")
-
-# Target: Law Firms in Lagos (High potential for NO website)
-hunt_maps("Law Firm", "Lagos")
-EOF
-
-python map_hunter.py
-cat <<EOF > lead_hunter.py
-import urllib.request
-import urllib.parse
-import re
-import csv
-
-def hunt_lagos_leads():
-    print(f"\n--- 🕵️‍♂️ EASYWURLD: Scanning Lagos for 'Invisible' Law Firms ---")
-    
-    # We use 'site:google.com' to find the actual Google Business profiles 
-    # for firms in Lagos that don't have their own website link indexed.
     query = 'law firm Lagos "no website" OR "directions" -inurl:http'
     encoded_query = urllib.parse.quote(query)
     url = f"https://www.google.com/search?q={encoded_query}&num=20"
@@ -498,3 +375,126 @@ cd ..
 git add .
 git commit -m "Moving files to root for easier access"
 git push origin main
+COMPANY="Suave_Properties"
+# 1. Create the folder
+mkdir -p "$COMPANY"
+cd "$COMPANY"
+# 2. THE MASTER HOME PAGE (index.html)
+cat <<EOF > index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$COMPANY | Home</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400&display=swap');
+        body { margin: 0; background: #050505; color: #fff; font-family: 'Inter', sans-serif; }
+        nav { position: fixed; width: 100%; top: 0; padding: 30px; display: flex; justify-content: space-between; box-sizing: border-box; z-index: 1000; background: rgba(0,0,0,0.8); }
+        nav a { color: #fff; text-decoration: none; margin-left: 20px; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; }
+        .hero { height: 100vh; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80'); background-size: cover; background-attachment: fixed; display: flex; align-items: center; padding: 0 10%; }
+        h1 { font-family: 'Playfair Display', serif; font-size: 5rem; margin: 0; color: #c5a059; }
+        .btn { display: inline-block; padding: 20px 40px; border: 1px solid #c5a059; color: #c5a059; text-decoration: none; text-transform: uppercase; font-size: 11px; letter-spacing: 3px; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div style="font-family:'Playfair Display'; color:#c5a059;">EASYWURLD</div>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="services.html">Services</a>
+        </div>
+    </nav>
+    <div class="hero">
+        <div>
+            <p style="letter-spacing:10px; color:#888;">ESTATE ARCHITECTURE</p>
+            <h1>$COMPANY</h1>
+            <a href="services.html" class="btn">Explore Portfolio</a>
+        </div>
+    </div>
+</body>
+</html>
+EOF
+
+# 3. THE ABOUT PAGE (about.html)
+cat <<EOF > about.html
+<!DOCTYPE html>
+<html><head><style>body{background:#050505; color:#fff; font-family:sans-serif; padding:100px 10%;} h1{color:#c5a059; font-family:serif; font-size:3rem;}</style></head>
+<body>
+    <h1>Our Vision</h1>
+    <p style="line-height:2; color:#888; max-width:600px;">$COMPANY is a leading boutique agency dedicated to high-end lifestyle curation. We don't just sell property; we architect legacies.</p>
+    <a href="index.html" style="color:#c5a059;">Back to Home</a>
+</body></html>
+EOF
+
+# 4. THE SERVICES PAGE (services.html)
+cat <<EOF > services.html
+<!DOCTYPE html>
+<html><head><style>body{background:#050505; color:#fff; font-family:sans-serif; padding:100px 10%;} h1{color:#c5a059; font-family:serif; font-size:3rem;}</style></head>
+<body>
+    <h1>Services</h1>
+    <ul style="color:#888; line-height:3;">
+        <li>Luxury Property Brokerage</li>
+        <li>Asset Management & Maintenance</li>
+        <li>Investment Portfolio Strategy</li>
+    </ul>
+    <a href="index.html" style="color:#c5a059;">Back to Home</a>
+</body></html>
+EOF
+
+# 5. GO BACK AND PUSH
+cd ..
+git add .
+git commit -m "Complete 4-Page Enterprise Site for $COMPANY"
+git push origin main
+COMPANY="Aluko_Oyebode"
+INDUSTRY="Specialist Legal Infrastructure"
+mkdir -p "$COMPANY"
+cd "$COMPANY"
+# 1. HOME: The "Power & Authority" Layout
+cat <<EOF > index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$COMPANY | 2026 Corporate Portal</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@200;400&display=swap');
+        body { margin:0; background:#020b1a; color:#fff; font-family:'Inter',sans-serif; }
+        nav { position:fixed; width:100%; top:0; padding:30px; display:flex; justify-content:space-between; box-sizing:border-box; z-index:1000; background:rgba(2,11,26,0.9); }
+        .logo { font-family:'Playfair Display'; font-size:1.3rem; color:#a5b4fc; letter-spacing:3px; }
+        .hero { height:100vh; display:flex; align-items:center; padding:0 10%; border-left: 1px solid #1e293b; }
+        h1 { font-family:'Playfair Display'; font-size:5rem; margin:0; line-height:1; }
+        .btn { display:inline-block; padding:20px 50px; border:1px solid #a5b4fc; color:#a5b4fc; text-decoration:none; text-transform:uppercase; font-size:11px; letter-spacing:4px; margin-top:40px; transition:0.3s; }
+        .btn:hover { background:#a5b4fc; color:#020b1a; }
+        .wa-float { position:fixed; bottom:40px; right:40px; background:#25d366; padding:20px; border-radius:50px; text-decoration:none; font-weight:bold; color:#fff; z-index:1000; }
+    </style>
+</head>
+<body>
+    <nav><div class="logo">EASYWURLD / CORP</div><a href="about.html" style="color:#fff; text-decoration:none; font-size:10px; letter-spacing:2px;">THE FIRM</a></nav>
+    <div class="hero">
+        <div>
+            <p style="letter-spacing:10px; color:#475569; text-transform:uppercase;">$INDUSTRY</p>
+            <h1>$COMPANY</h1>
+            <a href="https://wa.me/2349050690837" class="btn">View Digital Architecture</a>
+        </div>
+    </div>
+    <a href="https://wa.me/2349050690837" class="wa-float">Connect with Architect</a>
+</body>
+</html>
+EOF
+
+# 2. ABOUT: The "Expertise" Page
+cat <<EOF > about.html
+<!DOCTYPE html>
+<html><head><style>body{background:#020b1a; color:#fff; font-family:sans-serif; padding:150px 10%;} h1{font-family:serif; color:#a5b4fc; font-size:3rem;}</style></head>
+<body>
+    <h1>Excellence & Trust</h1>
+    <p style="max-width:650px; line-height:2.2; color:#94a3b8; font-size:1.1rem;">At $COMPANY, we recognize that digital stability is the foundation of 2026 operations. Our partnership with Easywurld ensures our digital footprint matches our physical reputation for uncompromising excellence.</p>
+    <br><a href="index.html" style="color:#a5b4fc; text-decoration:none;">RETURN TO PORTAL</a>
+</body></html>
+EOF
+
+cd ..
+git add . && git commit -m "Deployment: High-Trust Corporate Style for $COMPANY" && git push origin main
