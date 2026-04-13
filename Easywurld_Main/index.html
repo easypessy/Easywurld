@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easywurld | Simplify. Optimize. Grow.</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
+        
+        :root {
+            --beige: #fbe7c5;
+            --green: #144d3c;
+            --white: #ffffff;
+            --black: #000000;
+        }
+
+        body { 
+            margin: 0; 
+            background: var(--beige); 
+            color: var(--green); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Canva Sans Fallback */
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 { font-family: 'Lora', serif; font-weight: 700; }
+
+        nav { 
+            padding: 30px 10%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            background: var(--white);
+            border-bottom: 1px solid rgba(20, 77, 60, 0.1);
+        }
+
+        .logo { font-family: 'Lora', serif; font-size: 1.5rem; letter-spacing: 2px; font-weight: bold; }
+
+        .hero { 
+            padding: 150px 10%; 
+            text-align: center; 
+            background: var(--white);
+        }
+
+        .hero h1 { font-size: 4.5rem; margin: 0; line-height: 1.1; }
+        .hero p { font-size: 1.2rem; max-width: 700px; margin: 20px auto; color: var(--black); opacity: 0.8; }
+
+        .services-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px; 
+            padding: 100px 10%; 
+        }
+
+        .service-card { 
+            padding: 40px; 
+            background: var(--white); 
+            border: 1px solid rgba(20, 77, 60, 0.1);
+            transition: 0.3s;
+        }
+
+        .service-card:hover { transform: translateY(-5px); border-color: var(--green); }
+
+        .portfolio-section { padding: 100px 10%; background: var(--green); color: var(--beige); }
+        
+        .portfolio-links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 40px; }
+        .portfolio-links a { 
+            color: var(--beige); 
+            text-decoration: none; 
+            padding: 20px; 
+            border: 1px solid rgba(251, 231, 197, 0.3);
+            display: block;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn { 
+            display: inline-block; 
+            padding: 18px 45px; 
+            background: var(--green); 
+            color: var(--beige); 
+            text-decoration: none; 
+            margin-top: 30px; 
+            font-weight: bold;
+        }
+
+        footer { padding: 50px 10%; text-align: center; border-top: 1px solid rgba(20, 77, 60, 0.1); }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">EASYWURLD</div>
+        <div style="font-size: 0.8rem; letter-spacing: 2px;">
+            <a href="#services" style="color:var(--green); text-decoration:none; margin-left:20px;">SERVICES</a>
+            <a href="#portfolio" style="color:var(--green); text-decoration:none; margin-left:20px;">PORTFOLIO</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <p style="color:var(--green); letter-spacing: 8px;">SIMPLIFY. OPTIMIZE. GROW.</p>
+        <h1>Creative Performance Architecture.</h1>
+        <p>Expert-level digital marketing, institutional report writing, and high-conversion sales funnels curated for the elite.</p>
+        <a href="https://wa.me/2349050690837" class="btn">Start Your Growth</a>
+    </header>
+
+    <section id="services" class="services-grid">
+        <div class="service-card">
+            <h3>Marketing & SMM</h3>
+            <p>Data-driven strategy, content calendars, and faceless brand growth.</p>
+        </div>
+        <div class="service-card">
+            <h3>Report Writing</h3>
+            <p>Academic precision meets business strategy. From PRDs to Investor Reports.</p>
+        </div>
+        <div class="service-card">
+            <h3>Presentations</h3>
+            <p>High-impact slide decks and executive pitch narratives.</p>
+        </div>
+        <div class="service-card">
+            <h3>Automation</h3>
+            <p>Intelligent sales funnels and digital marketing workflow optimization.</p>
+        </div>
+    </section>
+
+    <section id="portfolio" class="portfolio-section">
+        <h2 style="font-size: 3rem;">The Portfolio Hub</h2>
+        <p>Explore our industry-specific digital ecosystems.</p>
+        <div class="portfolio-links">
+            <a href="/Easywurld/Veritasi_Homes/index.html">Luxury Real Estate Demo</a>
+            <a href="/Easywurld/Sahara_Group/index.html">Energy & Infrastructure Demo</a>
+            <a href="/Easywurld/Suave_Properties/index.html">Boutique Property Demo</a>
+            <a href="/Easywurld/Air_Peace/index.html">Logistics & Aviation Demo</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Easywurld Digital Agency. Built for Performance.</p>
+    </footer>
+
+</body>
+</html>
